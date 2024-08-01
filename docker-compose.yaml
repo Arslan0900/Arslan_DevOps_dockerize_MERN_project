@@ -1,0 +1,52 @@
+version: '3'  # Specifies the version of the Docker Compose file format.
+
+services:
+  front:
+    build:
+      context: './react-docker'  # Specifies the directory containing the Dockerfile for the front-end service.
+      dockerfile: Dockerfile  # The Dockerfile used to build the image.
+    ports:
+      - 3000:3000  # Maps port 3000 on the host to port 3000 on the container.
+    container_name: react-container  # Assigns a custom name to the container.
+    environment:
+      - WATCHPACK_POLLING=true  # Sets an environment variable for the container.
+    networks:
+      - mern-stack-network  # Specifies the network the container will join.
+    volumes:
+      - ./react-docker:/app  # Mounts the local directory `./react-docker` to `/app` in the container.
+    depends_on:
+      - backend  # Ensures the backend service starts before this service.
+
+  backend:
+    build:
+      context: './express-docker'  # Specifies the directory containing the Dockerfile for the back-end service.
+      dockerfile: Dockerfile  # The Dockerfile used to build the image.
+    ports:
+      - 5500:5500  # Maps port 5500 on the host to port 5500 on the container.
+    container_name: express-container  # Assigns a custom name to the container.
+    networks:
+      - mern-stack-network  # Specifies the network the container will join.
+    volumes:
+      - ./express-docker:/app  # Mounts the local directory `./express-docker` to `/app` in the container.
+    depends_on:
+      - mongo  # Ensures the mongo service starts before this service.
+
+  mongo:
+    image: mongo  # Specifies the Docker image to use for the MongoDB service.
+    ports:
+      - 27017:27017  # Maps port 27017 on the host to port 27017 on the container.
+    container_name: mongo-container  # Assigns a custom name to the container.
+    networks:
+      - mern-stack-network  # Specifies the network the container will join.
+    volumes:
+      - mongoData:/data/db  # Mounts a Docker volume named `mongoData` to `/data/db` in the container.
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin  # Sets the MongoDB root username.
+      - MONGO_INITDB_ROOT_PASSWORD=090078601  # Sets the MongoDB root password.
+      - MONGO_INITDB_DATABASE=All products  # Sets the initial database name.
+
+networks:
+  mern-stack-network:  # Defines a custom network named `mern-stack-network`.
+
+volumes:
+  mongoData:  # Defines a Docker volume named `mongoData`.
